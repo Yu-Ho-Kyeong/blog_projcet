@@ -33,7 +33,7 @@ public class Comment {
     @Column(nullable = false)
     private String commentContent;  // 댓글 내용
 
-    @Column(length=255, nullable = false)
+    @Column
     private String commentUserId;   // 댓글 id
 
     @Column
@@ -53,4 +53,19 @@ public class Comment {
         this.regDate = LocalDateTime.now();
   }
 
+  @Override
+    public String toString() {
+      return "Comment{" +
+              "commentNo=" + commentNo +
+              ", boardNo='" + boardNo + '\'' +
+              ", commentContent='" + commentContent + '\'' +
+              ", commentUserId=" + commentUserId +
+              ", regDate=" + regDate +
+              '}';
+  }
+
+  public void update(String content){
+    this.commentContent = content;
+
+  }
 }

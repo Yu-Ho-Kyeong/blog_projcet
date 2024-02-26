@@ -1,6 +1,5 @@
 package com.blog.blogback.Dto;
 
-import jakarta.persistence.Column;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -8,9 +7,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import com.blog.blogback.Entity.Board;
-import com.blog.blogback.Entity.User;
+import com.blog.blogback.Entity.Tag;
 
 @Getter
 @Setter
@@ -21,36 +21,52 @@ public class BoardRequestDto {
     private String boardTitle;
     private String boardContent;
     private String imgPath;
-    private String tag;
+    //private String tag;
+    private List<Tag> tags;
+    private LocalDateTime updDate;
 
     @Builder
-    public BoardRequestDto(Long boardNo, String boardUserId, String boardTitle, 
-            String boardContent, String imgPath, String tag) {
-        this.boardNo = boardNo;
+    public BoardRequestDto(String boardUserId, String boardTitle, String boardContent, 
+                            String imgPath, LocalDateTime updDate, List<Tag> tags) {
+        //this.boardNo = boardNo;
         this.boardUserId = boardUserId;
         this.boardTitle = boardTitle;
         this.boardContent = boardContent;
         this.imgPath = imgPath;
-        this.tag = tag;
+        this.tags = tags;
+        this.updDate = updDate;
     }
 
-    public BoardRequestDto(Board board) {
-        this.boardNo = board.getBoardNo();
-        this.boardUserId = board.getBoardUserId();
-        this.boardTitle = board.getBoardTitle();
-        this.boardContent = board.getBoardContent();
-        this.imgPath = board.getImgPath();
-        this.tag = board.getTag();
-    }
+    // public BoardRequestDto(Board board) {
+    //     this.boardNo = board.getBoardNo();
+    //     this.boardUserId = board.getBoardUserId();
+    //     this.boardTitle = board.getBoardTitle();
+    //     this.boardContent = board.getBoardContent();
+    //     this.imgPath = board.getImgPath();
+    //     this.tags = board.getTags();
+    // }
 
     public Board toEntity() {
         return Board.builder()
-                .boardNo(boardNo)
                 .boardUserId(boardUserId)
                 .boardTitle(boardTitle)
                 .boardContent(boardContent)
                 .imgPath(imgPath)
-                .tag(tag)
+                .updDate(updDate)
+                .tags(tags)
                 .build();
     }
+
+    public String toString() {
+        return "BoardRequestDto{" +
+                "boardNo=" + boardNo +
+                ", boardUserId='" + boardUserId + '\'' +
+                ", boardTitle='" + boardTitle + '\'' +
+                ", boardContent='" + boardContent + '\'' +
+                ", imgPath='" + imgPath + '\'' +
+                //", regDate=" + regDate +
+                ", updDate=" + updDate +
+                '}';
+    }
+
 }

@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserRequestDto {
-    private Integer userNo;
+    private Long userNo;
     private String userId;
     private String userPw; 
     private String name;
@@ -18,7 +18,7 @@ public class UserRequestDto {
     private String imgPath;
 
     @Builder
-    public UserRequestDto(Integer userNo, String userId, String userPw, 
+    public UserRequestDto(Long userNo, String userId, String userPw, 
                             String name, String introduction, String imgPath) 
     {
         this.userNo = userNo;

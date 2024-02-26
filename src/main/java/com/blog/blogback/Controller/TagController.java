@@ -13,19 +13,38 @@ import org.springframework.web.bind.annotation.RestController;
 import com.blog.blogback.Dto.BoardRequestDto;
 import com.blog.blogback.Entity.Tag;
 import com.blog.blogback.Repository.TagRepository;
+import com.blog.blogback.service.BoardService;
+
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.Optional;
+
+@Slf4j
 @RequestMapping("/api/user/tag")
 @RestController
 public class TagController {
     
-    @Autowired TagRepository tagRepository;
+    @Autowired private TagRepository tagRepository;
+    @Autowired private BoardService boardService;
 
-    @GetMapping("/getTags")
-    public List<Tag> getTages(){
-        List<Tag> tag = tagRepository.findAll();
-        return tag;
+    // @GetMapping("/getTags")
+    // public List<Tag> getTag(){
+    //     List<Tag> tag = tagRepository.findAll();
+    //     return tag;
+    // }
+
+    @GetMapping("/allTagCnt")
+    public int allTagCnt(){
+        int cnt = tagRepository.allTagCnt();
+        return cnt;
+    }
+
+    @GetMapping("/getTag")
+    public List<Object[]> getTags(){
+        log.info("getTag() 진입");
+        List<Object[]> tagInfo = boardService.getTag();
+        return tagInfo;
     }
 
     @GetMapping("/{tagNo}")
