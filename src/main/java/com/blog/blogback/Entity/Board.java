@@ -10,11 +10,12 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.hibernate.annotations.DynamicInsert;
 
 import org.springframework.util.Assert;
 
@@ -28,7 +29,9 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
+@DynamicInsert 
 @Table(name="board")
+
 public class Board {
     
     @Id
@@ -36,48 +39,43 @@ public class Board {
     @Column(name = "board_no")
     private Long boardNo;
     
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "board_user_id", referencedColumnName = "userId")
     private User user;
 
-    // @Column(length=255, nullable = false)
-    // private String boardUserId;
+    @JsonIgnore
+    @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<Comment> comments = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<Tag> tags;
 
     @Column(nullable = false)
     private String boardTitle;
 
-    @Column(nullable = false)
+    @Column
     private String boardContent;
+    
+    @JsonIgnore
+    @OneToMany(mappedBy = "board", orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<BoardImg> imgPathList = new ArrayList<>();   
 
-    @Column(length = 255)
-    private String imgPath;
-    //private String tag;
     @Column
     private LocalDateTime regDate;
 
     @Column
     private LocalDateTime updDate;
 
-    // @Column(length = 100)
-    // private String tag;
-
-    @JsonIgnore
-    @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private List<Tag> tags;
-    
     @Builder
-    public Board(String boardUserId, String boardTitle, 
+    public Board(User user, String boardTitle, 
                     String boardContent, String imgPath, LocalDateTime regDate,
-                    LocalDateTime updDate, List<Tag> tags) {
-        Assert.hasText(boardUserId, "boardUserId must not be empty");
+                    LocalDateTime updDate, List<Tag> tags, List<Comment> childrenList) {
+        
         Assert.hasText(boardTitle, "boardTitle must not be empty");
-        Assert.hasText(boardContent, "boardContent must not be empty");
-
-        //this.boardNo = boardNo;
-        //this.boardUserId = boardUserId;
+        this.user = user;
         this.boardTitle = boardTitle;
         this.boardContent = boardContent;
-        this.imgPath = imgPath;
         this.regDate = LocalDateTime.now();
         this.updDate = updDate;
 
@@ -87,40 +85,25 @@ public class Board {
           }
           this.tags = tags;
         }
-        //this.tag = tag;
   }
 
-  @Override
-  public String toString() {
-      return "Board{" +
-              "boardNo=" + boardNo +
-              //", boardUserId='" + boardUserId + '\'' +
-              ", boardTitle='" + boardTitle + '\'' +
-              ", boardContent='" + boardContent + '\'' +
-              ", imgPath='" + imgPath + '\'' +
-              ", regDate=" + regDate +
-              ", updDate=" + updDate +
-              '}';
+
+  public void addTag(Tag tag) {
+      if (tags == null) {
+          tags = new ArrayList<>();
+      }
+      tags.add(tag);
+      tag.setBoard(this);
   }
 
-public void addTag(Tag tag) {
-    if (tags == null) {
-        tags = new ArrayList<>();
-    }
-    tags.add(tag);
-    tag.setBoard(this);
-}
+  public void update(String title, String content){
+    this.boardTitle = title;
+    this.boardContent = content;
+    this.updDate = LocalDateTime.now();
+  }
 
-public void setBoardContent(String boardContent){
-  this.boardContent = boardContent;
-}
-
-public void setBoardTitle(String boardTitle){
-    this.boardTitle = boardTitle;
-}
-
-public void setUpdDate(LocalDateTime updDate){
-  this.updDate = updDate;
-}
+  public void updateContent(String content){
+    this.boardContent = content;
+  }
 
 }

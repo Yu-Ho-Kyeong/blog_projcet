@@ -10,9 +10,7 @@ import com.blog.blogback.Entity.User;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long>{
-    User findByUserIdAndUserPw(String userId, String userPw);
-    //Optional<CustomUserDetails> findByUsername(String username);
+    //userId로 user 정보 조회
     Optional<User> findByUserId(String userId);
-    Boolean existsByUserId(String userId);
 }
 

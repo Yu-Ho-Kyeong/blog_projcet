@@ -9,27 +9,27 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import com.blog.blogback.Entity.Board;
 import com.blog.blogback.Entity.Tag;
+import com.blog.blogback.Entity.User;
 
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class BoardRequestDto {
+public class BoardRequestDto {      // 게시글 저장
     private Long boardNo;
-    private String boardUserId;
+    private Long userNo;
     private String boardTitle;
     private String boardContent;
     private String imgPath;
-    //private String tag;
     private List<Tag> tags;
     private LocalDateTime updDate;
 
     @Builder
-    public BoardRequestDto(String boardUserId, String boardTitle, String boardContent, 
+    public BoardRequestDto(String boardTitle, String boardContent, 
                             String imgPath, LocalDateTime updDate, List<Tag> tags) {
-        //this.boardNo = boardNo;
-        this.boardUserId = boardUserId;
         this.boardTitle = boardTitle;
         this.boardContent = boardContent;
         this.imgPath = imgPath;
@@ -37,18 +37,9 @@ public class BoardRequestDto {
         this.updDate = updDate;
     }
 
-    // public BoardRequestDto(Board board) {
-    //     this.boardNo = board.getBoardNo();
-    //     this.boardUserId = board.getBoardUserId();
-    //     this.boardTitle = board.getBoardTitle();
-    //     this.boardContent = board.getBoardContent();
-    //     this.imgPath = board.getImgPath();
-    //     this.tags = board.getTags();
-    // }
-
-    public Board toEntity() {
+    public Board toEntity(User user) {
         return Board.builder()
-                .boardUserId(boardUserId)
+                .user(user)
                 .boardTitle(boardTitle)
                 .boardContent(boardContent)
                 .imgPath(imgPath)
@@ -56,17 +47,4 @@ public class BoardRequestDto {
                 .tags(tags)
                 .build();
     }
-
-    public String toString() {
-        return "BoardRequestDto{" +
-                "boardNo=" + boardNo +
-                ", boardUserId='" + boardUserId + '\'' +
-                ", boardTitle='" + boardTitle + '\'' +
-                ", boardContent='" + boardContent + '\'' +
-                ", imgPath='" + imgPath + '\'' +
-                //", regDate=" + regDate +
-                ", updDate=" + updDate +
-                '}';
-    }
-
 }

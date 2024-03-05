@@ -16,9 +16,8 @@ import com.blog.blogback.Entity.Tag;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class TagRequestDto {
+public class TagRequestDto {        // 태그저장
     private Long tagNo;
-    //private Long boardNo;
     private String tagName;
     private LocalDateTime regDate;
     private Board board;
@@ -31,26 +30,5 @@ public class TagRequestDto {
             .board(board)
             .regDate(LocalDateTime.now())
             .build();
-    }
-
-    // public void setBoardNo(Long boardNo){
-    //     this.boardNo = boardNo;
-    // }
-
-    // public void setTagName(String tagName){
-    //     this.tagName = tagName;
-    // }
-
-    public String toString() {
-        return "BoardRequestDto{" +
-                //"boardNo=" + boardNo +
-                ", tagNo='" + tagNo + '\'' +
-                ", tagName='" + tagName + '\'' +
-                ", board='" + board + '\'' +
-                //", regDate=" + regDate +
-                ", regDate=" + regDate +
-                '}';
-    }
-
-    
+    }  
 }

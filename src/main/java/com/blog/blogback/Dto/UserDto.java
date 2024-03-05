@@ -1,7 +1,6 @@
 package com.blog.blogback.Dto;
 
 import com.blog.blogback.Entity.User;
-import com.blog.blogback.security.CustomUserDetails;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

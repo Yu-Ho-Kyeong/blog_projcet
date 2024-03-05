@@ -21,33 +21,27 @@ import java.util.List;
 import java.util.Optional;
 
 @Slf4j
-@RequestMapping("/api/user/tag")
+@RequestMapping("/api/tag")
 @RestController
 public class TagController {
     
     @Autowired private TagRepository tagRepository;
     @Autowired private BoardService boardService;
 
-    // @GetMapping("/getTags")
-    // public List<Tag> getTag(){
-    //     List<Tag> tag = tagRepository.findAll();
-    //     return tag;
-    // }
-
-    @GetMapping("/allTagCnt")
+    // 모든 태그 개수 count
+    @GetMapping("/all/allTagCnt")
     public int allTagCnt(){
         int cnt = tagRepository.allTagCnt();
         return cnt;
     }
 
-    @GetMapping("/getTag")
+    @GetMapping("/all/getTag")
     public List<Object[]> getTags(){
-        log.info("getTag() 진입");
         List<Object[]> tagInfo = boardService.getTag();
         return tagInfo;
     }
 
-    @GetMapping("/{tagNo}")
+    @GetMapping("/all/{tagNo}")
     public ResponseEntity<?> getTag(@PathVariable Long tagNo) {
         try {
             Optional<Tag> tagOptional = tagRepository.findByTagNo(tagNo);

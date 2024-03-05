@@ -2,70 +2,99 @@ package com.blog.blogback.Entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 import lombok.AccessLevel;
 import lombok.Builder;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.ArrayList;
 
-import org.springframework.util.Assert;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicInsert;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name="Comment")
+/* 
+Hibernate에서 엔티티를 데이터베이스에 삽입할 때 자동으로 null이거나 기본값인 필드를 제외하고,  
+데이터베이스에 실제로 있는 필드만을 삽입
+*/
+@DynamicInsert 
+@Table(name="comment")
 @Entity
 
 public class Comment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long commentNo;         // 댓글 번호
+    @Column(name = "comment_no")
+    private Long id;  
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "comment_user_id", referencedColumnName = "userId")
+    private User user;
 
-    @Column
-    private Long boardNo;           // 게시글 번호
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "board_no", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private Board board;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_comment_no")
+    @JsonIgnore
+    private Comment parent;               
+
+    //@JsonIgnore
+    @OneToMany(mappedBy = "parent", orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<Comment> children = new ArrayList<>();   
 
     @Column(nullable = false)
-    private String commentContent;  // 댓글 내용
+    private String commentContent;  
+    
+    @Column(columnDefinition = "TINYINT", length = 1)
+    private int isSecret;
+               
+    @ColumnDefault("FALSE")
+    @Column
+    private Boolean isDeleted;            
+    
+    @Column
+    private LocalDateTime regDate;        
 
     @Column
-    private String commentUserId;   // 댓글 id
-
-    @Column
-    private LocalDateTime regDate;  // 등록일
-
+    private LocalDateTime updDate;        
 
     @Builder
-    public Comment(Long commentNo, Long boardNo, String commentContent, String commentUserId, 
-                    LocalDateTime regDate) {
-        Assert.hasText(commentContent, "boardUserId must not be empty");
-        Assert.hasText(commentUserId, "boardTitle must not be empty");
+    public Comment(Board board, String commentContent, User user, Comment parent,
+                    List<Comment> children, LocalDateTime regDate, Boolean isDeleted, int isSecret) {
 
-        this.commentNo = commentNo;
-        this.boardNo = boardNo;
+        this.board = board;
+        this.user = user;
+        this.parent = parent;
         this.commentContent = commentContent;
-        this.commentUserId = commentUserId;
+        this.children = children;
+        this.isDeleted = isDeleted;
+        this.isSecret = isSecret;
         this.regDate = LocalDateTime.now();
-  }
-
-  @Override
-    public String toString() {
-      return "Comment{" +
-              "commentNo=" + commentNo +
-              ", boardNo='" + boardNo + '\'' +
-              ", commentContent='" + commentContent + '\'' +
-              ", commentUserId=" + commentUserId +
-              ", regDate=" + regDate +
-              '}';
   }
 
   public void update(String content){
     this.commentContent = content;
-
+   
   }
+
 }

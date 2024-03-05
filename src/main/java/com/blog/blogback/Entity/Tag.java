@@ -11,7 +11,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 
-import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,8 +26,6 @@ public class Tag {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long tagNo;
 
-    //private Long boardNo;
-    
     @Column(name = "tag_name", length = 100)
     private String tagName;
 
@@ -36,7 +33,6 @@ public class Tag {
     private LocalDateTime regDate;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    //@ManyToOne()
     @JoinColumn(name = "board_no")
     private Board board;
 
@@ -46,21 +42,10 @@ public class Tag {
         this.tagName = tagName;
         this.board = board;
         this.regDate = LocalDateTime.now();
-        //this.boardNo = boardNo;
     }
 
     public Tag(String tagName) {
         this.tagName = tagName;
-    }
-
-    @Override
-    public String toString() {
-        return "Tag{" +
-                    "tagNo=" + tagNo +
-                    //"boardNo=" + boardNo +
-                    ", tagName='" + tagName + '\'' +
-                    "board=" + board +
-                '}';
     }
 
     // 게시글 설정 메서드
@@ -73,8 +58,4 @@ public class Tag {
         this.tagName = tagName;
     }
 
-    // 게시글 설정 메서드
-    public void setRegDate(LocalDateTime regDate) {
-        this.regDate = regDate;
-    }
 }

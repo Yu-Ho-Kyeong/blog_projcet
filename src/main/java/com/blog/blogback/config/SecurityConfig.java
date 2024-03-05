@@ -25,33 +25,36 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
 
 	private final JwtTokenProvider jwtTokenProvider;
-	// 허용 url
+
+	// ALL 허용 url
     private static final String[] All_PERMIT_URL_ARR = {
 		"/",
-		"/api/user/login",
-		"/api/user/signup",
-		"/api/user/check",
 		"/error",
-		"/api/user/board/getBoards",
-		"/api/user/board/getBoard/**",
-		"/api/user/comment/getCount/**",
-		"/api/user/comment/getComment/**",
-		"/api/user/tag/**"
-	
+		"/api/all/**",
+		"/api/board/all/**",
+		"/api/comment/all/**",
+		"/api/tag/all/**"
 	};
 
-	// 허용 url
+	// USER 허용 url
     private static final String[] USER_PERMIT_URL_ARR = {
-		"/api/user/board/saveBoard",	 	// 게시글 작성 및 수정
-		"/api/user/comment/addComment",		// 댓글작성
-		"/api/user/board/delete",			// 게시글 삭제
-		"/api/user/test"
+		"/api/comment/user/**",
+		"/api/admin/uploadImg",		 // 회원프로필수정(설정페이지)
+		"/api/admin/adminUpdateInfo" // 회원정보수정(설정페이지)
+	};
 
+	// ADMIN 허용 url
+    private static final String[] ADMIN_PERMIT_URL_ARR = {
+		"/api/comment/user/**",
+		"/api/board/admin/**",	 	
+		"/api/comment/admin/**",		
+		"/api/board/admin/**",			
+		"/api/admin/**"
 	};
 
 	@Bean
 	protected SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-       	 		httpSecurity
+       	 	httpSecurity
                 // REST API이므로 basic auth 및 csrf 보안을 사용하지 않음
                 .httpBasic(httpBasic ->httpBasic.disable())
                 .csrf(csrf -> csrf.disable())
@@ -61,8 +64,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
 					// 해당 API에 대해서는 모든 요청을 허가
 					.requestMatchers(All_PERMIT_URL_ARR).permitAll()
-					// USER 권한이 있어야 요청할 수 있음
-					.requestMatchers(USER_PERMIT_URL_ARR).hasRole("USER")
+					// USER 권한 허용
+					.requestMatchers(USER_PERMIT_URL_ARR).hasAnyRole("USER", "ADMIN")
+					// ADMIN 권한 허용
+					.requestMatchers(ADMIN_PERMIT_URL_ARR).hasRole("ADMIN")
 					// 이 밖에 모든 요청에 대해서 인증을 필요로 한다는 설정
 					.anyRequest()
 					.authenticated()

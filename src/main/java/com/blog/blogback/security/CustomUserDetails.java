@@ -3,24 +3,18 @@ package com.blog.blogback.security;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import org.hibernate.mapping.Set;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.util.Assert;
 
-import com.blog.blogback.Entity.UserAuthority;
-
 import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -53,13 +47,8 @@ public class CustomUserDetails implements UserDetails {
 
     private char enabled;
     
-
-    // @OneToMany(mappedBy = "user")
-    // private List<UserAuthority> roles = new ArrayList<>();
     @Column(name = "role")
-    private String role;
-    //private List<String> roles = new ArrayList<>();
-    
+    private String role;  
 
     @Builder
     public CustomUserDetails(Long id, String userId, String userPw, String role,

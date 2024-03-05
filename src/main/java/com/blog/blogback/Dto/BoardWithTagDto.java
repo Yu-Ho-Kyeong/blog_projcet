@@ -2,6 +2,7 @@ package com.blog.blogback.Dto;
 
 import java.util.List;
 import com.blog.blogback.Entity.Board;
+import com.blog.blogback.Entity.BoardImg;
 import com.blog.blogback.Entity.Tag;
 
 import lombok.AllArgsConstructor;
@@ -13,8 +14,9 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class BoardWithTagDto {
+public class BoardWithTagDto {      // 태그별 게시글 정보 조회
     private Board board;
     private List<Tag> tags;
+    private List<BoardImg> imgs;
     private String tagName;
 }

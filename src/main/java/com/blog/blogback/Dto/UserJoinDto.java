@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.blog.blogback.Entity.Role;
 import com.blog.blogback.Entity.User;
-import com.blog.blogback.Entity.UserAuthority;
 import com.blog.blogback.security.CustomUserDetails;
 
 import lombok.AllArgsConstructor;
@@ -24,6 +23,7 @@ public class UserJoinDto {
     private String introduction;
     private String imgPath;
     private String role;
+    private String blogName;
 
     public User toEntity(String encodedPassword, String role) {
         
@@ -32,8 +32,9 @@ public class UserJoinDto {
             .userPw(encodedPassword)
             .role(role)
             .name(name)
+            .blogName(userId+".log")
             .introduction(introduction)
-            .imgPath(imgPath)
+            .imgPath("/img/profile/defaultProfile.png")
             .build();
     }
 
