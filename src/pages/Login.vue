@@ -7,13 +7,13 @@
       <div class="form-floating">
         <input type="text" class="form-control" id="userId" placeholder="id를 입력해주세요" 
               @keyup.enter="submit()"
-              v-model="state.form.userId">
+              v-model="form.userId">
         <label for="userId">Id</label>
       </div>
       <div class="form-floating">
         <input type="password" class="form-control" id="userPw" placeholder="password를 입력해주세요" 
               @keyup.enter="submit()"
-              v-model="state.form.userPw">
+              v-model="form.userPw">
         <label for="userPw">Password</label>
       </div>
 
@@ -35,79 +35,51 @@
 </template>
 
 <script>
-import axios from 'axios';
-import { reactive } from 'vue'; 
-import store from '@/script/store';
+import { useStore } from 'vuex'; // vuex 추가
+import { reactive, toRefs, computed } from 'vue';
 import router from '@/script/router';
+
 export default ({
     setup(){
-        const state = reactive({
-            form:{
-                userId:"",
-                userPw:""
-            }
-        })
-
-        // const getToken = (cookieName) => {
-        //   const cookies = document.cookie.split(';');
-        //   console.log('cookies : ' + cookies);
-        //   console.log('cookies_test : ' + document.cookie);
-        //   for (let i = 0; i < cookies.length; i++) {
-        //       const cookie = cookies[i].trim();
-        //       // 쿠키 이름이 일치하는 경우 쿠키 값을 반환
-        //       if (cookie.startsWith(cookieName + '=')) {
-        //           return cookie.substring(cookieName.length + 1);
-        //       }else{
-        //         console.log('서버cookie : ' + cookie);
-        //         console.log('cookieName : ' + cookieName + '=');
-        //         console.log('쿠키이름이 일치하지 않음')
-        //       }
-        //   }
-        //   return null; // 쿠키를 찾지 못한 경우 null 반환
-        // }
-
-        const submit = () => {
-          if(!state.form.userId){
-            alert('id를 입력해주세요.')
-            return;
-          }
-          if(!state.form.userPw){
-            alert('password를 입력해주세요.')
-            return;
-          }
-
-          axios.post("/api/user/login", state.form)
-            .then((res) => {
-               store.commit('setAccount', {
-                        id: res.data,
-                        userId: state.form.userId,
-                        //name: res.data.userName 
-                });  
-                //let token = getToken('token');
-                
-                // if (token) {
-                //   console.log(token); // 쿠키 값 출력
-                // } else {
-                //   console.log("토큰이 존재하지 않습니다.");
-                // }
-               // store.commit('setToken', token); // 토큰 저장
-                
-
-
-                //console.log('headers : ' + res.headers['set-cookie']);
-                //console.log('Content-Type : ' + JSON.stringify(res));
-                //console.log('headers : ' + JSON.stringify(res.headers, null, 2));
-                //console.log('세션 데이터 : ' + JSON.stringify(store.state.account, null, 2));
-                router.push({path:'/'});
-                sessionStorage.setItem("id", res.data);
-                window.alert("로그인되었습니다.");
-            }).catch(() =>{
-              window.alert("로그인 정보가 존재하지 않습니다.");
-            })
+      const store = useStore(); 
+      const errorState = computed(() => store.getters.getErrorState);
+      const state = reactive({
+        form:{
+          userId:"",
+          userPw:"" 
         }
-        
+      })
+      const goToPages = () => {
+        router.push({
+          name: 'Home'
+        })
+      }
+      const submit = async () => {
+        if(!state.form.userId){
+          alert('id를 입력해주세요.')
+          return;
+        }
+        if(!state.form.userPw){
+          alert('password를 입력해주세요.')
+          return;
+        }
 
-        return { state, submit };
+        try{
+          let loginResult = await store.dispatch('login', { // login 액션 호출
+            userId: state.form.userId,
+            userPw: state.form.userPw
+          });
+          if (loginResult) goToPages();
+        } catch (err) {
+          if (err.message.indexOf('Network Error') > -1) {
+            alert('서버에 접속할 수 없습니다. 상태를 확인해주세요.')
+          } else {
+            alert('로그인 정보를 확인할 수 없습니다.')
+          }
+        }
+      }
+
+      return {...toRefs(state), submit, errorState, goToPages };
     } 
 })
 </script>
@@ -116,42 +88,42 @@ export default ({
   html,body {
     height: 100%;
   }
-.fw-normal{
-  margin-top: 5rem;
-}
-.form-signin {
-  max-width: 530px;
-  padding: 1rem;
-}
+  .fw-normal{
+    margin-top: 5rem;
+  }
+  .form-signin {
+    max-width: 530px;
+    padding: 1rem;
+  }
 
-.form-signin .form-floating:focus-within {
-  z-index: 2;
-}
+  .form-signin .form-floating:focus-within {
+    z-index: 2;
+  }
 
-.form-signin input[type="text"] {
-  margin-bottom: -1px;
-  border-bottom-right-radius: 0;
-  border-bottom-left-radius: 0;
-}
+  .form-signin input[type="text"] {
+    margin-bottom: -1px;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+  }
 
-.form-signin input[type="password"] {
-  margin-bottom: 10px;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-}
-.btn{
-  background-color: rgb(0, 0, 0);
-  margin-bottom: 5rem;
-  cursor: pointer;
-}
-.btn-join{
-  float : right;
-}
-.join-a, .form-check-label{
-  text-decoration-line: none;
-  cursor: pointer;
-}
-.join-a:hover{
-  text-decoration-line:underline;
-}
+  .form-signin input[type="password"] {
+    margin-bottom: 10px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+  .btn{
+    background-color: rgb(0, 0, 0);
+    margin-bottom: 5rem;
+    cursor: pointer;
+  }
+  .btn-join{
+    float : right;
+  }
+  .join-a, .form-check-label{
+    text-decoration-line: none;
+    cursor: pointer;
+  }
+  .join-a:hover{
+    text-decoration-line:underline;
+  }
 </style>

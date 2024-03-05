@@ -5,12 +5,18 @@
       <div class="seperator"></div>
 
       <div class="tag-container">
-        <TagInput :tags="tagsFromChild" ref="tagInputRef" />
+        <TagInput :tags="tagsFromChild" ref="tagInputRef" @update:tags="updateTag"  />
       </div>    
 
       <div class="editor-container">
         <div class="editor-page">
-            <editor v-model="content"></editor>
+            <!-- //<editor v-model="content"></editor> -->
+            <!-- <Editor :content="contentFromChild" @update:content="onEditorChange" /> -->
+            <Editor :content="contentFromChild" 
+                    :parentFile="filesFromChild"
+                    :parentBoardNo="this.boardNo" 
+                    @update:content="onEditorChange"
+                    @update:file="onImageAdded"/>
         </div>
       </div>
 
@@ -25,73 +31,63 @@
 <script>
 import Editor from '@/pages/board/Editor.vue';
 import TagInput from "@/pages/tag/TagInput.vue";
-
-
-// import axios from 'axios';
-// import router from '@/script/router';
-// import store from '@/script/store';
-
+import base64 from '@/script/util/base64.js';
 export default {
   components: { Editor, TagInput },
   data() {
     return {
-      requestBody: this.$route.query,
-      boardNo: this.$route.query.boardNo,
-      boardUserId: '',
-      boardTitle: '',
-      content: '',
-      tagsFromChild: [],
-      regDate : '',
-      tag : ''
+      requestBody         : this.$route.query,
+      boardNo             : this.$route.query.boardNo,
+      boardUserId         : '',
+      userNo              : localStorage.getItem('user_no'),
+      boardTitle          : '',
+      content             : '',
+      contentFromChild    : '',
+      filesFromChild      : [],
+      tagsFromChild       : [],
+      regDate             : '',
+      tags                : '',
+      uploadData          : []
     };
   },
   mounted() {
-    this.fnGetView()
+    if (this.boardNo !== undefined) { 
+      this.fnGetView()      // 게시글 수정시 해당 게시글 정보 불러오기
+    }
   },
   methods: {
     fnGetView() {
       if (this.boardNo !== undefined) { // 게시글을 수정할 경우 (boardNo가 존재)
-        this.$axios.get(this.$boardUrl + '/' + this.boardNo, {
-        params: this.requestBody
-        }).then((res) => {
-          this.boardTitle = res.data.boardTitle
-          this.boardUserId = res.data.boardUserId
-          this.content = res.data.boardContent
-          this.regDate = res.data.regDate
-          this.tag = res.data.tag
-
-          console.log('받아온 data : ' + JSON.stringify(res, null, 2));
-          console.log('받아온 content : ' + this.content);
+        this.$axios.get(this.$boardUrl + '/all/getBoard/' + this.boardNo).then((res) => {
+          this.boardTitle = res.data.board.boardTitle
+          this.boardUserId = res.data.board.boardUserId
+          this.contentFromChild = res.data.board.boardContent
+          this.regDate = res.data.board.regDate
+          this.tags = res.data.tags
 
           // TagInput에서 받아온 태그 데이터를 tagsFromChild에 저장
-          if(this.tag){
-            const type = typeof(this.tag);
-            console.log('tagstype : ' + type);
-            this.tagsFromChild = this.tag.split(',').map(tag => tag.trim());
-            this.$refs.tagInputRef.addTag(this.tagsFromChild);
-            console.log('this.tagsFromChild : ' + this.tagsFromChild);
-          }else{
-            console.log('tag is null');
+          if(this.tags != null){
+            for(const key in this.tags){
+              if(Object.hasOwnProperty.call(this.tags, key)){
+                this.tagsFromChild = this.tags[key].tagName;
+                //console.log('tag-for : ' + this.tagsFromChild);
+                this.$refs.tagInputRef.addTag(this.tagsFromChild);  // 받아온 tag를 하나씩 add하여 노출
+              }
+            }
           }
-          
-
         }).catch((err) => {
           console.log(err)
         })
       }else{
         if (this.$store.state.account) {
-          this.boardUserId = this.$store.state.account.userId;
-          console.log('세션 데이터 : ' + JSON.stringify(this.$store.state.account, null, 2));
-        } else {
-          console.log("no user.value");
+          this.boardUserId = localStorage.getItem('user_id');
         }
       }
     },
     
     fnList() {
-      delete this.requestBody.boardNo
       this.$router.push({
-        path: './board',
+        path: './detail',
         query: this.requestBody
       })
     },
@@ -99,48 +95,127 @@ export default {
     fnView(boardNo) {
       this.requestBody.boardNo = boardNo
       this.$router.push({
-        path: './detail',
+        name: 'BoardDetail',
         query: this.requestBody
+      });
+    },
+
+    onEditorChange(content) {
+      this.contentFromChild = content;
+      //console.log('this.contentFromChild : ' + this.contentFromChild);
+    },
+
+    onImageAdded(file){
+      console.log('file : ' + file);
+      this.filesFromChild.push(file);
+      //this.filesFromChild=file;
+      this.filesFromChild.forEach(file =>{
+        console.log('this.filesFromChild : ' + file);
+        console.log('file_type1 : ' + typeof file);
       })
     },
 
     fnSave() {
-      let apiUrl = this.$boardUrl + '/saveBoard'
-      const tagsFromChild = this.$refs.tagInputRef.tags;
+      //console.log('fnSave()');
+      const apiUrl = this.$boardUrl + '/admin/saveBoard'
+      const tagsFromChild = this.$refs.tagInputRef.tags; // 사용자 입력 tag data
+      // 신규 게시글 저장 boardContent에 img태그가 포함되어 있어 일단 제외하고 저장
+      if(this.boardNo === undefined){   
+        this.form = {
+          "boardNo"       : this.boardNo,
+          "userNo"        : this.userNo,
+          "boardTitle"    : this.boardTitle,
+          //"boardContent"  : this.contentFromChild,
+          //"tags"          : tagsFromChild.join(', ') //문자열로 전송
+          "tags"          : tagsFromChild // 배열형태로 전송
+        };
+        //console.log('전송 데이터:', this.form);
 
-      console.log("boardTitle : " + this.boardTitle);
-      console.log("content : " + this.content);
-      console.log("id : " + this.$store.state.account.id);
-      console.log('Tags from child component:', tagsFromChild);
+        this.$axios.post(apiUrl, this.form, {
+          headers : {
+            'Content-Type' : 'application/json',
+          }
+        })
+        .then((res) => {    // 백엔드에서 게시글 저장후 생성된 게시글 번호 반환
+          this.boardNo = res.data;
+          if(this.filesFromChild.length > 0) {    // 받아온 이미지 파일이 있으면
+            this.uploadData = new FormData();
+            this.filesFromChild.forEach(file => {
+              this.uploadData.append('files', file);
+            });
+            this.uploadData.append('boardNo', this.boardNo);
 
-      this.form = {
-        "boardNo"       : this.boardNo,
-        "boardUserId"   : this.boardUserId,
-        "boardTitle"    : this.boardTitle,
-        "boardContent"  : this.content,
-        "tag"           : tagsFromChild.join(', ')
-      };
-      console.log('전송 데이터:', this.form);
+            this.$axios.post(this.$boardUrl+'/admin/uploadImg', this.uploadData, {
+              headers : {
+                'Content-Type': 'multipart/form-data'
+              }
+            }).then((res) => { // 업로드된 파일 경로 반환
+              if(this.contentFromChild) {
+                // editor에서 받아온 html로 구성된 content에서 img태그만 추출
+                const imgSources = base64.imginHtmlChk(this.contentFromChild);    
+                if(imgSources) { // 추출한 배열 base64 -> 서버에서 생성한 url로 변환 
+                  this.boardContent = base64.updateBase64ToServerUrl(this.contentFromChild, imgSources, res.data);
+                  let imgPathList = [];
+                  imgPathList=res.data;     // board_img 테이블에 들어갈 이미경로 배열
+                  //console.log('this.boardContent : ' + this.boardContent);
 
-      if(this.boardNo === undefined){
-        //INSERT
-        this.$axios.post(apiUrl, this.form)
-        .then((res) => {
-          console.log('savedBoardNo : ' + res.data);
+                  const form = {
+                    'boardContent' : this.boardContent,   // img-src 속성이 base64->url로 변환된 content
+                    'imgPathList'  : imgPathList,
+                    'boardNo'      : this.boardNo
+                  } 
+  
+                  const apiUrl = this.$boardUrl + '/admin/saveImg';
+                  this.$axios.post(apiUrl, form, {
+                    headers : {
+                      'Content-Type' : 'application/json',
+                    }
+                  })
+                  .then((res)=>{
+                    this.fnView(res.data.board.boardNo)   // 저장한 게시글의 정보를 다시 불러옴
+                  }).catch((err)=>{
+                    if (err.message.indexOf('Network Error') > -1) {
+                      alert('네트워크가 원활하지 않습니다.\n잠시 후 다시 시도해주세요.')
+                    }else if(err.response && err.response.status === 500){
+                      alert('error');
+                    }else if(err.response && err.response.status === 403){
+                        alert('권한이 없습니다. 관리자에게 문의해주세요');
+                    }
+                  })
+                }
+              }
+            }).catch((err) => {
+              if (err.message.indexOf('Network Error') > -1) {
+                alert('네트워크가 원활하지 않습니다.\n잠시 후 다시 시도해주세요.')
+              } else if(err.response && err.response.status === 500){
+                alert('error');
+              }
+            });
+          }
           alert('글이 저장되었습니다.')
-          this.fnView(res.data)
+  
         }).catch((err) => {
           if (err.message.indexOf('Network Error') > -1) {
             alert('네트워크가 원활하지 않습니다.\n잠시 후 다시 시도해주세요.')
           }
         })
-      }else{
-        console.log('수정할 this.boardNo : ' + this.boardNo);
-        // UPDATE
-        this.$axios.put(apiUrl, this.form)
+      }else{    // 게시글 수정
+        const form = {
+          "boardNo"       : this.boardNo,
+          "boardTitle"    : this.boardTitle,
+          "boardContent"  : this.contentFromChild,
+          //"tags"          : tagsFromChild.join(', ') //문자열로 전송
+          "tags"          : tagsFromChild // 배열형태로 전송
+        };
+        //console.log('전송 데이터:', form);
+        this.$axios.put(apiUrl, form,{
+          headers : {
+            'Content-Type' : 'application/json',
+          }
+        })
         .then((res) => {  
           alert('글이 저장되었습니다.')
-          console.log('res.data : ' + res.data);
+          //console.log('res.data : ' + JSON.stringify(res.data));
           this.fnView(res.data.boardNo)
         }).catch((err) => {
           if (err.message.indexOf('Network Error') > -1) {
@@ -149,14 +224,6 @@ export default {
         })
       }
     },
-
-    // 이벤트 핸들러 추가
-    // handleTagAdded(tag) {
-    //   this.tagsFromChild.push(tag);
-    // },
-    // handleTagRemoved(index) {
-    //   this.tagsFromChild.splice(index, 1);
-    // }
   }
 }
 </script>
@@ -169,10 +236,6 @@ export default {
     margin: 0 auto;
     padding: 20px;
 }
-/* .tag-container{
-  display: inline-flex;
-} */
-
 
 .board-title {
     background: transparent;

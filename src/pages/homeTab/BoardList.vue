@@ -1,38 +1,58 @@
 <template>
       <div class="container">
-        <div class="row row-cols-1 g-3 con_wrap">
-          <div class="col" v-for="(bitem, idx) in state.boardItems" :key="idx"><!-- items: 배열 item : 객체 -->
-            <!-- {{item}} 현재는 String 형태의 데이터가 들어가 있음 데이터타입이 Object로 들어가면 객체가 들어감--> 
+        <div class="row row-cols-1 g-3 con_wrap" v-if="state.boardItems !== null">
+          <div class="col" v-for="(bitem, idx) in state.boardItems" :key="idx">
             <Board :bitem="bitem" v-if="bitem"/>
-
           </div>
         </div>
       </div>
- 
 </template>
 
 <script>
 import Board from '@/pages/board/BoardList.vue';
-import axios from 'axios';
-import { reactive } from 'vue'; 
+
 export default {
   components: { Board },
-	name :'Home',
-    setup(){
-      const state = reactive({
+  name: 'Home',
+  props: ['boardListData'],
+  data() {
+    return {
+      state: {
         boardItems: [],
-        tagItems:[]
-      });
-      // 게시글 정보 불러오기
-      axios.get("/api/user/board/getBoards").then(({data}) => { 
-        state.boardItems = data;
-        console.log("board_data : " + JSON.stringify(data), null, 2);
-      })
-      .catch((error) => {
-        console.error('Board API 호출 중 에러 발생:', error);
-      });
-      return { state };
+        tagItems: []
+      }, 
+    };
+  },
+  mounted() {
+    this.fetchBoardItems(); // 게시글 정보 조회
+  },
+  methods: {
+
+    fetchBoardItems(boardListData) { 
+      if(boardListData && boardListData.tagName){  //태그별 게시글 정보 조회 
+        const tagName = boardListData.tagName;
+        //console.log('tagName 있음');
+        
+        this.$axios.get(this.$boardUrl + "/all/getBoardsWithTag/" + tagName)
+          .then((res) => {
+            this.state.boardItems = res.data;
+          })
+          .catch((error) => {
+            console.error('Board API 호출 중 에러 발생:', error);
+          });
+         
+      }else{    //전체 게시글 정보 조회
+        this.$axios.get(this.$boardUrl + "/all/getBoards")
+        .then((res) => { 
+          this.state.boardItems = res.data;
+          console.log('res.data : ' + JSON.stringify(res.data));
+        })
+        .catch((error) => {
+          console.error('Board API 호출 중 에러 발생:', error);
+        });
+      }
     }
+  }
 }
 </script>
 <style scoped>
@@ -43,7 +63,8 @@ export default {
   }
   
   .con_wrap{
-    padding-left: 220px;
-    width: 100%;
+    /* padding-left: 220px; */
+    float: right;
+    width: 80%;
   }
 </style>

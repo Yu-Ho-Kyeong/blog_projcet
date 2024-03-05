@@ -1,158 +1,132 @@
 <template>
   <div class="board-detail">
     <div class="board-contents">
-      <h1>{{ boardTitle }}</h1>
+      <h1>{{ state.boardItems.boardTitle }}</h1>
       <div class="board-information">
-        <span class="userId"><strong>{{ boardUserId }}</strong></span>
-        <span class="regDate">{{formatRegDate(regDate)}}</span>
+        <span class="userId">{{ state.boardItems.name }}</span>
+        <span class="seperator1">·</span>
+        <span class="regDate">{{formatRegDate(state.boardItems.regDate)}}</span>
       </div>
-      <div class="common-buttons">
-        <button type="button" class="" v-on:click="fnUpdate">수정</button>
-        <button type="button" class="" v-on:click="fnDelete">삭제</button>
-        <button type="button" class="" v-on:click="fnList">목록</button>
+      <div class="common-buttons" v-if="this.$store.state.account.userRole === 'ROLE_ADMIN'">
+        <button type="button" v-if="state.boardItems.boardUserId === this.$store.state.account.userId"
+                v-on:click="fnUpdate">수정</button>
+        <button type="button"  v-if="state.boardItems.boardUserId === this.$store.state.account.userId"
+                v-on:click="fnDelete">삭제</button>
+        <button type="button" 
+                v-on:click="fnList">목록</button>
       </div>
-      <div class="tag-name">
-        <strong><span class="tagName">{{tag}}</span></strong>
+      <div class="tag-name" v-for="tag in state.boardItems.tags" :key="tag.tagNo">
+        <span class="tagName">{{tag.tagName}}</span>
       </div>
-    </div>
-
-
-    <div class="board-series" style="display:none">
-      <h2><a href="/">시리즈 제목</a></h2> <!-- 시리즈 제목 -->
-      <ol class="board-series-ol">
-        <li><a href="/" class="active"></a></li> <!-- 시리즈 리스트 : 현재 클릭된 게시글은 색깔 진하게-->
-      </ol>
-      <div class="">
-        <div class="">
-          <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
-            <path d="M7 14l5-5 5 5z"></path>
-          </svg>숨기기 <!-- board-series-ol 접기 펼치기  -->
-        </div>
-        <div class="">
-          <div class="series-number">3/6</div> <!-- 페이지 넘버 -->
-          <div class="">
-            <button class="series-previous"> <!-- 이전 게시물로 이동 -->
-              이전
-            </button>
-            <button class="series-next"> <!-- 다음 게시물로 이동 -->
-              다음
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="board-img">
-      <img :src="this.imgPath" alt="썸네일">
     </div>
 
     <div class="board-contents">
-      <!-- <span>{{ boardContent }}</span> -->
-      <span v-html="boardContent"></span>
+      <span v-html="state.boardItems.boardContent"></span>
     </div>
 
     <div class="user-profile">
       <div class="left">
         <a class="profile-pic" href="">
-          <img alt="profile" fetchpriority="high" width="128" height="128" 
-              decoding="async" data-nimg="1" style="color:transparent" 
-              src="https://images.velog.io/images/cindy-choi/profile/1dcf051d-4820-472b-a3fc-2782449f2430/9D473C99-114F-4D41-A8F3-46B421A49FD1.png">
+          <img :src="this.state.boardItems.userProfile" alt="profile">
         </a>
         <div class="user-profile-detail">
-          <a href="">{{ boardUserId }}</a>
-          <div>소개글</div>
+          <a class="profile-userId" href="/">{{ state.boardItems.name }}</a>
+          <div class="intro">{{state.boardItems.intro}}</div>
         </div>
       </div>
     </div>
 
     <div class="board-move">
-      <div class="previous-move">
-        <a class="pre-move-link" href="">
+      <div class="previous-move" v-if="minYn=='N'">
+        <a class="pre-move-link" @click="fnView(`${state.preBoardItems.boardNo}`)">
           <div class="pre-arrow">
-            <!-- 화살표 -->
+            <!-- 화살표 이미지 -->
             <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
               <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"></path>
             </svg>
           </div>
           <div class="pre-board">
             <div class="description pre">이전 포스트</div>
-            <h3><strong>이전글 제목</strong></h3>
+            <h3>{{state.preBoardItems.boardNo}}</h3>
+            <h3>{{state.preBoardItems.boardTitle}}</h3>
+            
           </div>
         </a>
       </div>
 
-      <div class="next-move">
-        <a class="next-move-link" href="">
+      <div class="next-move" v-if="maxYn=='N'">
+        <a class="next-move-link" @click="fnView(`${state.nextBoardItems.boardNo}`)">
           <div class="next-arrow">
-            <!-- 화살표 -->
+            <!-- 화살표 이미지 추후 수정예정 -->
             <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
               <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"></path>
             </svg>
           </div>
           <div class="next-board">
             <div class="description next">다음 포스트</div>
-            <h3><strong>다음글 제목</strong></h3>
+            <h3>{{state.nextBoardItems.boardNo}}</h3>
+            <h3>{{state.nextBoardItems.boardTitle}}</h3>
           </div>
         </a>
       </div>
     </div>
-    <Comment />
+    <Comment :parentBoardNo="this.boardNo" ref="commentListRef"/>
   </div>
 </template>
 
 <script>
-import { reactive } from 'vue'; 
 import Comment from '@/pages/comment/Comment.vue';
 export default { 
   components: { Comment },
-  
-   setup(){
-      const state = reactive({
-      items: []
-      });
-     
-      return { state };
-    },
-  data() { //변수생성
+  data() { 
     return {
+      state:{
+        boardItems : [],      // 현재 게시글 정보
+        preBoardItems : [],   // 이전 게시글 정보
+        nextBoardItems : []   // 다음 게시글 정보
+      },
       requestBody: this.$route.query,
       boardNo: this.$route.query.boardNo,
-      boardTitle: '',
-      boardUserId: '',
-      boardContent: '',
-      imgPath: '',
-      updDate: '',
-      regDate: '',
-      tag: ''
+      maxBoardNo:0,                       
+      minBoardNo:0,
+      minYn : 'N',            //게시글번호 min여부
+      maxYn : 'N'             //게시글번호 max 여부
     }
   },
   mounted() {
-    if(this.boardNo != 'undefined'){
-      console.log('boardNo : ' + this.boardNo);
-      console.log('url : ' + this.$boardUrl);
-      
-      this.fnGetView()
+    if(this.boardNo != 'undefined'){          
+      this.fnGetView()                              // 현재 게시글 정보
+      this.fnGetMaxNo('max', this.boardNo)          // 다음글이 max인지 조회
+      this.fnGetMaxNo('min', this.boardNo)          // 이전글이 min인지 조회
+      this.fnGetBoardDirection(this.boardNo,'pre')  //  이전게시글 정보
+      this.fnGetBoardDirection(this.boardNo,'next') //  다음게시글 정보
     }
-    
   },
+
   methods: {
-    fnGetView() {
-      console.log("fnGetView 작동");
-      //console.log("boardNo : " + this.boardNo);
-      //console.log("requestBody : " + this.requestBody);
-      this.$axios
-        .get(this.$boardUrl + "/" +this.boardNo, {
-        params: this.requestBody,
-      })
+
+    // 게시글 정보 + 유저 소개글 + 게시글 이미지
+    fnGetView(boardNo) {
+      if(boardNo){
+        this.boardNo = boardNo;
+        this.requestBody.boardNo = boardNo;
+        //console.log('fnGetView() : ' + this.boardNo);
+      }
+      
+      this.$axios.get(this.$boardUrl + "/all/getBoard/" + this.requestBody.boardNo)
       .then((res) => {
-        this.boardTitle = res.data.boardTitle
-        this.boardUserId = res.data.boardUserId
-        this.boardContent = res.data.boardContent
-        this.imgPath = res.data.imgPath
-        this.updDate = res.data.updDate
-        this.regDate = res.data.regDate
-        this.tag = res.data.tag
-        console.log('data : ' + JSON.stringify(res, null, 2));
+        this.state.boardItems.boardTitle = res.data.board.boardTitle
+        this.state.boardItems.boardUserId = res.data.board.user.userId
+        this.state.boardItems.boardContent = res.data.board.boardContent
+        this.state.boardItems.imgPath = res.data.board.imgPath
+        this.state.boardItems.updDate = res.data.board.updDate
+        this.state.boardItems.regDate = res.data.board.regDate
+        this.state.boardItems.tags = res.data.tags
+        this.state.boardItems.imgs = res.data.imgs.imgPath
+        this.state.boardItems.intro = res.data.board.user.introduction
+        this.state.boardItems.name = res.data.board.user.name
+        this.state.boardItems.userProfile = res.data.board.user.imgPath
+        
       })
       .catch((err) => {
         if (err.message.indexOf('Network Error') > -1) {
@@ -161,26 +135,29 @@ export default {
       })
       
     },
-    fnList() {
+    fnList() {      // 목록
       delete this.requestBody.boardNo
       this.$router.push({
         path: '/',
         query: this.requestBody
       })
     },
-    fnUpdate() {
+    fnUpdate() {      // 수정
       // this.requestBody.tag = this.tag
-      // this.requestBody.boardContent = this.boardContent
+      //this.$route.query.boardNo = this.boardNo
       console.log('requestBody : ' + JSON.stringify(this.requestBody, null, 2));
+      console.log('requestBody : ' + this.boardNo);
+
       this.$router.push({
-        path: './write',
+        name: 'BoardWrite',
         query: this.requestBody
       })
     },
-    fnDelete() {
+    fnDelete() {    // 삭제
       if (!confirm("삭제하시겠습니까?")) return
-      console.log('url : ' + this.$boardUrl + "/" + this.boardNo);
-      this.$axios.delete(this.$boardUrl + "/" + this.boardNo)
+      //console.log('url : ' + this.$boardUrl + "/" + this.boardNo);
+      const apiUrl = this.$boardUrl + "/admin/delete/";
+      this.$axios.delete(apiUrl + this.boardNo)
           .then(() => {
             alert('삭제되었습니다.')
             this.fnList();
@@ -188,14 +165,100 @@ export default {
         console.log(err);
       })
     },
+    fnView(boardNo) {   // 이전 혹은 다음게시글 이동
+      this.boardNo = boardNo
+      this.requestBody.boardNo = boardNo
+
+      this.$router.push({
+        name: 'BoardDetail',
+        query: this.requestBody
+      });
+      this.$refs.commentListRef.fnGetCount(boardNo);
+      this.$refs.commentListRef.fnGetView(boardNo);
+      
+      this.fnGetView(boardNo)
+      this.fnGetMaxNo('max', boardNo)    // 다음글이 max인지 조회
+      this.fnGetMaxNo('min', boardNo)    // 이전글이 min인지 조회
+      this.fnGetBoardDirection(boardNo,'pre')  //  이전게시글 정보
+      this.fnGetBoardDirection(boardNo,'next') //  다음게시글 정보
+    },
     // y-m-d format date
     formatRegDate(date) {
-      console.log('date : ' + date);
+      if (!date) return ''; // date가 undefined이면 빈 문자열을 반환하고 함수를 종료합니다.
       const formattedDate = date.split('T')[0];
-      console.log('formattedDate : ' + formattedDate);
-      //const formattedDate = new Date(date).toISOString().split('T')[0];
       return formattedDate;
     },
+
+    fnGetBoardDirection(boardNo, type){   // 이전게시글, 다음게시글 정보 가져오기
+      //console.log('fnGetBoardDirection() : ' + boardNo);
+      if(type == 'pre'){
+        //console.log('pre 버튼');
+        this.$axios.get(this.$boardUrl + '/all/getPreBoard/' + boardNo)
+        .then((res) =>{
+          this.state.preBoardItems.boardNo = res.data.preBoardNo;
+          this.state.preBoardItems.boardTitle = res.data.boardTitle
+        })
+        .catch((err) => {
+          if (err.message.indexOf('Network Error') > -1) {
+            alert('네트워크가 원활하지 않습니다.\n잠시 후 다시 시도해주세요.')
+          }
+        })
+      }else{
+        this.$axios.get(this.$boardUrl + '/all/getNextBoard/' + boardNo)
+        .then((res) =>{
+          this.state.nextBoardItems.boardNo = res.data.nextBoardNo;
+          this.state.nextBoardItems.boardTitle = res.data.boardTitle
+        })
+        .catch((err) => {
+          if (err.message.indexOf('Network Error') > -1) {
+            alert('네트워크가 원활하지 않습니다.\n잠시 후 다시 시도해주세요.')
+          }
+        })
+      }
+    },
+
+    fnGetMaxNo(type, boardNo){      // 게시글번호 max값 조회
+      this.boardNo = boardNo;
+      if(type === 'max'){
+        this.$axios.get(this.$boardUrl + '/all/maxBoardNo')
+        .then((res) =>{
+          this.maxBoardNo = res.data;
+          if(this.boardNo == this.maxBoardNo){
+            this.maxYn = 'Y';
+            console.log('this.maxYn : ' + this.maxYn);
+          }else{
+            this.maxYn = 'N';
+            console.log('this.boardNo : this.maxBoardNo' + this.boardNo + ':' + this.maxBoardNo);
+            console.log('this.boardNo : '+ this.boardNo);
+          }
+        })
+        .catch((err) => {
+          if (err.message.indexOf('Network Error') > -1) {
+            alert('네트워크가 원활하지 않습니다.\n잠시 후 다시 시도해주세요.')
+          }
+        })
+      }else{      // 게시글번호 min값 조회
+        this.$axios.get(this.$boardUrl + '/all/minBoardNo')
+        .then((res) =>{
+          this.minBoardNo = res.data;
+       
+          if(this.boardNo == this.minBoardNo){
+            this.minYn = 'Y';
+            console.log('this.minYn : ' + this.minYn);
+          }else{
+            this.minYn = 'N';
+            console.log('this.boardNo : this.minBoardNo' + this.boardNo + ':' + this.minBoardNo);
+            console.log('this.boardNo : '+ this.boardNo);
+          }
+        })
+        .catch((err) => {
+          if (err.message.indexOf('Network Error') > -1) {
+            alert('네트워크가 원활하지 않습니다.\n잠시 후 다시 시도해주세요.')
+          }
+        })
+      }
+      
+    }
   }
 }
 </script>
@@ -206,7 +269,6 @@ export default {
   margin: auto;
   padding: 20px;
   background-color: #fff;
-  
   border-radius: 8px;
 }
 
@@ -214,6 +276,12 @@ export default {
   margin-bottom: 20px;
   display: flex;
   flex-direction: column;
+}
+.board-contents h1{
+  margin-top: 50px;
+  margin-bottom: 40px;
+  font-weight: bold;
+  font-size: 2.5em;
 }
 
 .board-img{
@@ -233,7 +301,23 @@ h1 {
 }
 
 .userId {
-  margin-right: 10px; /* Optional: Add margin between userId and regdate */
+  font-weight: bold;
+  font-size: 1.1em;
+}
+.seperator1{
+  margin-right: 10px;
+  margin-left: 10px;
+}
+.regDate{
+  color: #495057;
+  font-size: 1.0em;
+}
+
+.tagName{
+  background-color: #f4faff;
+  border-radius: 5px;
+  color: rgb(79, 223, 175);
+  font-size: 1.2em;
 }
 
 .common-buttons {
@@ -270,10 +354,17 @@ h1 {
 }
 
 .common-buttons button {
+  color: #495057;
   margin-right: 10px;
   border : none;
   background-color: #fff;
 }
+
+.board-contents{
+  font-size: 1.5em;
+  margin-top: 5em;
+}
+
 .user-profile {
   margin-top: 16rem;
   margin-bottom: 6rem;
@@ -289,6 +380,15 @@ h1 {
   margin-left: 1rem;
   margin-right: 1rem;
 }
+
+.profile-userId{
+  font-size: 2em;
+  margin-bottom: 0.5em;
+}
+
+a:link { color: red; text-decoration: none;}
+a:visited { color: black; text-decoration: none;}
+a:hover { color: blue; text-decoration: underline;}
 
 .board-move {
   display: flex;
@@ -366,7 +466,7 @@ h1 {
 }
 
 h3 {
-
+  font-weight: bold;
   color: #333;
   font-size: 1.2em;
   margin-top:5px;

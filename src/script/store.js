@@ -1,25 +1,23 @@
 import { createStore } from 'vuex'
-
+import mutation from './mutation';
+import actions from "./actions";
+import getters from './getters';
 // Create a new store instance.
 const store = createStore({
   state () {
     return {
       account: {
-        id: 0,
-        userId: '',
+        id: '',
+        user: null,
+        token : '',
+        isLogin: false,
+        
       },
-
-    }
+    } 
   },
-  mutations: {
-    setAccount(state, payload){
-       // payload가 객체로 전달되기 때문에 객체 디스트럭처링을 사용하여 각각의 프로퍼티에 할당
-       state.account = { ...state.account, ...payload };
-    },
-    // setToken(state, token){
-    //   state.account.token = token;
-    // }
-  }
+  actions: actions,
+  mutations: mutation,
+  getters: getters
 })
 
 export default store;

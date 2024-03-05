@@ -1,11 +1,14 @@
 <template>
   <div class="tags-input-container">
     <div class="added-tag">
-      <div class="tag" v-for="(tag, index) in tags" :key="'tag'+index" @click="removeTag(index)">{{tag}}</div>
+      <div class="tag" v-for="(tag, index) in tags" :key="'tag'+index" 
+                      @click="removeTag(index)">{{tag}}</div>
     </div>
 
     <div class="tag-input">
-      <input v-model="tagValue" placeholder="태그를 입력하세요" @keyup.enter="addTag(tagValue)" :class="{ 'none': inputClasses[index] }" />
+      <input v-model="tagValue" placeholder="태그를 입력하세요" 
+            @keyup.enter="addTag(tagValue)" :class="{ 'none': inputClasses[index] }" 
+            @update:tags="updateTag(tagValue)"/>
     </div>
   </div>
 </template>
@@ -20,44 +23,24 @@ export default {
   },
   data() {
     return {
+      editTagValue : this.tagsFromChild,
       tagValue: '',
       tags: [],
       inputClasses: [],
       v: '',
     };
   },
-  // mounted(){
-  //   if(this.tagsFromChild.length !== 0){
-  //     console.log('this.tagsFromChild : ' + this.tagsFromChild.length);
-  //     this.tags = [...this.tagsFromChild];
-  //   }else{
-  //     console.log('this.tagsFromChild2 : ' + this.tagsFromChild.length);
-  //   }
-  // },
+
   methods: {
     addTag(tagValue) {
       if (this.tagValue !== '') {
         this.tags.push(this.tagValue);
-        console.log('this.tagValue : ' + this.tagValue);
         this.$emit('tag-added', this.tagValue)
         this.tagValue = '';
-        console.log('this.tagValue : ' + this.tagValue);
       }else{
-        if(Array.isArray(tagValue)){
-          //console.log('tagValue : ' + JSON.stringify(tagValue, null, 2));
-          
-          console.log('length : ' + tagValue.length);
-          for(let v=0; v<tagValue.length; v++){
-            //this.tagValue = tagValue.join(', ')
-            console.log('tagValue['+v+'] : ' + tagValue[v]);
-            this.tagValue = tagValue[v];
-            this.tags.push(this.tagValue);
-          }
-          
-        }
-
-        console.log('this.tagValue2 : ' + this.tagValue);
-        this.$emit('tag-added', this.tagValue)
+        // 게시글 수정을 통해 db에서 태그를 불러올 경우
+        this.tags.push(tagValue);
+        this.$emit('tag-added', tagValue)
         this.tagValue = '';
         
       }
@@ -65,6 +48,10 @@ export default {
     removeTag(index) {
       this.$emit('tag-removed', index);
       this.tags.splice(index, 1);
+    },
+
+    updateTag(tagValue){
+      this.editTagValue = tagValue;
     }
   },
  
@@ -78,7 +65,6 @@ export default {
         max-width: 600px;
         padding: 10px;
         flex-direction: column;
-        /* background-color: rgba(#8b8787, .7); */
     }
     .added-tag{
         display: inline-flex;

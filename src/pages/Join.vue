@@ -24,7 +24,7 @@
 
       <div class="form-group">
         <label for="name">한줄 소개</label>
-        <input v-model="Introduction" type="text" id="Introduction" class="form-control" required />
+        <input v-model="introduction" type="text" id="introduction" class="form-control" required />
       </div>
 
       <div class="button-group">
@@ -45,17 +45,17 @@ export default ({
       const name = ref('');
       const userId = ref('');
       const userPw = ref('');
-      const Introduction = ref('');
+      const introduction = ref('');
       const cancle = () => {          //취소버튼
-          router.push({path:'/'});    //메인으로 이동
+          router.push({path:'/'});    
       }
       const submitForm = async () =>{
         try{
-          const response = await axios.post('/api/user/signup',{
+          const response = await axios.post('/api/all/signup',{
             name: name.value,
             userId: userId.value,
             userPw: userPw.value,
-            Introduction: Introduction.value
+            introduction: introduction.value
           });
            // Response를 로그에 출력하거나 필요에 따라 사용
           console.log(response);
@@ -66,7 +66,7 @@ export default ({
           console.log('회원가입 실패', error.response.data);
         }
       }
-      return { name, userId, userPw, Introduction, submitForm, cancle }
+      return { name, userId, userPw, introduction, submitForm, cancle }
     },
     
 })
