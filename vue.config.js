@@ -7,6 +7,6 @@ module.exports = {
           }
       }
   },
-  publicPath: process.env.NODE_ENV === "production" ? "/blog_projcet" : "/",
-  outputDir: "docs",
+  publicPath: "/blog_projcet/",
+  outputDir: "./docs"
 }
