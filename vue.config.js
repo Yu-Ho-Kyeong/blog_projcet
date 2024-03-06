@@ -8,5 +8,5 @@ module.exports = {
       }
   },
   publicPath: "/blog_projcet/",
-  outputDir: "./docs"
+  outputDir: "docs"
 }
