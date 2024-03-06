@@ -7,5 +7,5 @@ module.exports = {
           }
       }
   },
-  publicPath: '/mlog-project'
+  publicPath: '/blog_project'
 }
