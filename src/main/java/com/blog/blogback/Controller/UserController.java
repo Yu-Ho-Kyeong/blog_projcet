@@ -1,12 +1,9 @@
 package com.blog.blogback.Controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.kafka.KafkaProperties.Admin;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,34 +11,27 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
-import com.blog.blogback.Dto.BoardRequestDto;
 import com.blog.blogback.Dto.JwtToken;
 import com.blog.blogback.Dto.UserDto;
 import com.blog.blogback.Dto.UserIntroDto;
 import com.blog.blogback.Dto.UserJoinDto;
 import com.blog.blogback.Dto.UserLoginDto;
-import com.blog.blogback.Dto.UserRequestDto;
+
 import com.blog.blogback.Dto.Admin.AdminDeleteRequestDto;
 import com.blog.blogback.Dto.Admin.AdminImgRequestDto;
 import com.blog.blogback.Dto.Admin.AdminRequestDto;
 import com.blog.blogback.Dto.Admin.AdminResponseDto;
-import com.blog.blogback.Entity.Board;
 import com.blog.blogback.Entity.User;
 import com.blog.blogback.Repository.UserRepository;
 import com.blog.blogback.common.JwtTokenProvider;
+
 import com.blog.blogback.security.CustomUserDetails;
 import com.blog.blogback.security.CustomUserDetailsService;
 import com.blog.blogback.security.CustomUserDtailsRepository;
 import com.blog.blogback.security.SecurityUtil;
 import com.blog.blogback.service.UserService;
 
-
-import io.jsonwebtoken.Claims;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

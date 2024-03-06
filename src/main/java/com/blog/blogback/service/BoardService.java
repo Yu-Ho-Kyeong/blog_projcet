@@ -1,17 +1,25 @@
 package com.blog.blogback.service;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.blog.blogback.Dto.BoardRequestDto;
+import com.blog.blogback.Dto.BoardWithTagDto;
 import com.blog.blogback.Dto.Board.BoardImgRequestDto;
 import com.blog.blogback.Dto.Board.BoardImgSaveDto;
+import com.blog.blogback.Dto.Comment.CommentResponseDto;
 import com.blog.blogback.Entity.Board;
 import com.blog.blogback.Entity.BoardImg;
+import com.blog.blogback.Entity.Comment;
 import com.blog.blogback.Entity.Tag;
 import com.blog.blogback.Entity.User;
 import com.blog.blogback.Repository.BoardImgRepository;
@@ -22,6 +30,7 @@ import com.blog.blogback.common.Exception.NotFoundException;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Optional;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -48,6 +57,65 @@ public class BoardService {
     private final TagRepository tagRepository;
     private final UserRepository userRepository;
     private final BoardImgRepository boardImgRepository;
+
+    @Transactional
+    public Page<BoardWithTagDto> getBoards(BoardRequestDto boardRequestDto, Pageable pageable) {
+        Page<Board> boards = boardRepository.findAllBoard(pageable);
+        // List<Board> boards = boardRepository.findAllBoard(Sort.by(Sort.Direction.DESC, "regDate"));
+        List<BoardWithTagDto> boardsWithTags = new ArrayList<>();
+        for (Board board : boards.getContent()) {
+            BoardWithTagDto boardWithTagDto = new BoardWithTagDto();
+            List<Tag> tags = board.getTags();
+            boardWithTagDto.setBoard(board);
+            boardWithTagDto.setTags(tags);
+            if(board.getImgPathList() != null){
+                List<BoardImg> imgs = board.getImgPathList();
+                boardWithTagDto.setImgs(imgs);
+            }
+            
+            boardsWithTags.add(boardWithTagDto);
+        }
+        //log.info("boards : {}", boards);
+        return new PageImpl<>(boardsWithTags, pageable, boards.getTotalElements());
+    }
+
+    @Transactional
+public Page<BoardWithTagDto> getBoardsWithTag(String tagName, Pageable pageable) {
+    Page<Object[]> boardsWithTags = boardRepository.findBoardWithTags(tagName, pageable);
+    List<BoardWithTagDto> boardsWithTagsDto = new ArrayList<>();
+    for (Object[] row : boardsWithTags.getContent()) {
+        Board board = (Board) row[0];
+        String tag = (String) row[1];
+        
+        BoardWithTagDto boardWithTagDto = new BoardWithTagDto();
+        boardWithTagDto.setBoard(board);
+        boardWithTagDto.setTagName(tag);
+        if (board.getImgPathList() != null) {
+            List<BoardImg> imgs = board.getImgPathList();
+            boardWithTagDto.setImgs(imgs);
+        }
+        boardsWithTagsDto.add(boardWithTagDto);
+    }
+    return new PageImpl<>(boardsWithTagsDto, pageable, boardsWithTags.getTotalElements());
+}
+
+    @Transactional
+    public Map<String, Object> getBoard(Long boardNo) {
+        
+        Optional<Board> boardOptional = boardRepository.findByBoardNo(boardNo);
+        Map<String, Object> response = new HashMap<>();
+        if(boardOptional.isPresent()){ 
+            Board board = boardOptional.get();
+            List<Tag> tags = board.getTags();
+            List<BoardImg> imgs = board.getImgPathList();
+
+            response.put("board", board);
+            response.put("tags", tags);
+            response.put("imgs", imgs);
+        }
+        return response;
+       
+    }
 
     // 게시글 저장
     @Transactional
@@ -150,10 +218,10 @@ public class BoardService {
         return tagInfo;
     }
     // 태그및 게시글 조회
-    public List<Board> findBoardWithTags(String tagName) {
-        Sort sort = Sort.by(Sort.Direction.DESC, "regDate");
-        return boardRepository.findBoardWithTags(tagName, sort);
-    }
+    // public List<Board> findBoardWithTags(String tagName) {
+    //     Sort sort = Sort.by(Sort.Direction.DESC, "regDate");
+    //     return boardRepository.findBoardWithTags(tagName, sort);
+    // }
     // 태그 count
     public int allTagCnt(){
         int cnt = tagRepository.allTagCnt();

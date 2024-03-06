@@ -3,7 +3,8 @@ package com.blog.blogback.Repository;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import com.blog.blogback.Entity.Board;
@@ -13,6 +14,7 @@ import com.blog.blogback.Entity.User;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
 
 @Repository
 public interface BoardRepository extends JpaRepository<Board, Long>{
@@ -33,9 +35,12 @@ public interface BoardRepository extends JpaRepository<Board, Long>{
     //태그 및 게시글 조회
     @Query("SELECT b, CONCAT(t.tagName, ',') FROM Board b JOIN b.tags t GROUP BY b")
     List<Board> findAllWithTags(Sort sort);
+    //태그 및 게시글 조회
+    @Query("SELECT b FROM Board b")
+    Page<Board> findAllBoard(Pageable Pageable);
     //태그별 게시글 조회
     @Query("SELECT b, t.tagName FROM Board b JOIN b.tags t WHERE t.tagName = :tagName GROUP BY b")
-    List<Board> findBoardWithTags(String tagName, Sort sort);
+    Page<Object[]> findBoardWithTags(String tagName, Pageable Pageable);
     // user정보로 게시글 삭제
     void deleteAllByUser(User user);
     // user정보로 연관된 게시글 리스트 조회

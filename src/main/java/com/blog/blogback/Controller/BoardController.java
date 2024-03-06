@@ -1,7 +1,8 @@
 package com.blog.blogback.Controller;
 
-
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.blog.blogback.Dto.BoardRequestDto;
@@ -34,7 +35,6 @@ import java.util.Optional;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.stream.Collectors;
 
 import org.springframework.web.bind.annotation.PutMapping;
 
@@ -44,63 +44,35 @@ import org.springframework.web.bind.annotation.PutMapping;
 @RestController
 public class BoardController {
 
-    private final BoardRepository boardRepository;
+    // private final BoardRepository boardRepository;
     private final BoardService boardService;
 
     // 게시글 정보 조회
     @GetMapping("/all/getBoards")     
-    public ResponseEntity<List<BoardWithTagDto>> getBoards(){
-        List<Board> boards = boardRepository.findAllWithTags(Sort.by(Sort.Direction.DESC, "regDate"));
-        List<BoardWithTagDto> boardsWithTags = new ArrayList<>();
-        for (Board board : boards) {
-            List<Tag> tags = board.getTags();
-            List<BoardImg> imgs = board.getImgPathList();
-            BoardWithTagDto boardWithTagDto = new BoardWithTagDto();
-            boardWithTagDto.setBoard(board);
-            boardWithTagDto.setTags(tags);
-            boardWithTagDto.setImgs(imgs);
-            boardsWithTags.add(boardWithTagDto);
-        }
-        //log.info("boards : {}", boards);
-        return ResponseEntity.ok(boardsWithTags);
+    public ResponseEntity<Page<BoardWithTagDto>> getBoards(BoardRequestDto boardRequestDto,
+            @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
+        
+        Pageable pageable = PageRequest.of(page, size, Sort.by("regDate").descending());
+        Page<BoardWithTagDto> boardPage = boardService.getBoards(boardRequestDto, pageable);
+
+        return ResponseEntity.ok(boardPage);
     }
 
     // 태그별 게시글 정보 조회
     @GetMapping("/all/getBoardsWithTag/{tagName}")
-    public List<BoardWithTagDto> getBoardsWithTag(@PathVariable String tagName){   
-        List<Board> boards = boardRepository.findBoardWithTags(tagName,Sort.by(Sort.Direction.DESC, "regDate"));
-        List<BoardWithTagDto> boardsWithTags = new ArrayList<>();
-        for (Board board : boards) {
-            BoardWithTagDto boardWithTagDto = new BoardWithTagDto();
-            boardWithTagDto.setBoard(board);
-            boardWithTagDto.setTagName(tagName);
-            boardsWithTags.add(boardWithTagDto);
-        }
-        return boardsWithTags;
+    public ResponseEntity<Page<BoardWithTagDto>> getBoardsWithTag(@PathVariable String tagName,
+                @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("regDate").descending()); 
+        Page<BoardWithTagDto> boardPage = boardService.getBoardsWithTag(tagName, pageable);
+
+        return ResponseEntity.ok(boardPage);
     }
 
     // 특정 게시글 정보 조회
     @GetMapping("/all/getBoard/{boardNo}")
-    public ResponseEntity<?> getBoard(@PathVariable Long boardNo) {
-        try {
-            Optional<Board> boardOptional = boardRepository.findByBoardNo(boardNo);
-            if(boardOptional.isPresent()){ 
-                Board board = boardOptional.get();
-                List<Tag> tags = board.getTags();
-                List<BoardImg> imgs = board.getImgPathList();
-
-                // Board 정보와 함께 Tag 정보도 함께 반환
-                Map<String, Object> response = new HashMap<>();
-                response.put("board", board);
-                response.put("tags", tags);
-                response.put("imgs", imgs);
-
-                return new ResponseEntity<>(response, HttpStatus.OK);
-            }
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        return new ResponseEntity<>("There is no data", HttpStatus.BAD_REQUEST);
+    public Map<String, Object> getBoard(@PathVariable Long boardNo) {
+        return boardService.getBoard(boardNo);
     }
 
     // 게시글 이미지 업로드

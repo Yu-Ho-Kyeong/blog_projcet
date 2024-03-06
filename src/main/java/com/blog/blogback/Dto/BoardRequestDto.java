@@ -9,8 +9,6 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import org.springframework.web.multipart.MultipartFile;
-
 import com.blog.blogback.Entity.Board;
 import com.blog.blogback.Entity.Tag;
 import com.blog.blogback.Entity.User;
