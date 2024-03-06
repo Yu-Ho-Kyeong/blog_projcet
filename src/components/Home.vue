@@ -103,9 +103,10 @@ export default {
         });
     },
 
-    // tagName 추출해서 BoardList로 전송
+    // tagName으로 boardList 조회
     fnGetListByTag(tagName) {
       this.state.boardListData.tagName = tagName;
+      this.$refs.boardListRef.state.boardByTagItems = [];
       this.$refs.boardListRef.fetchBoardItems(this.state.boardListData);
     },
 
@@ -161,6 +162,9 @@ export default {
     width: 75%;
     margin-left: 160px;
   }
+  .for_tag{
+    padding-left:0;
+  }
 
   .main-tag{
     position: fixed;
@@ -168,13 +172,14 @@ export default {
     left: calc(50% - 570px); 
     width: 200px;
     background: #fff;
-    /* border: 1px solid #aaa; */
     z-index: 999;
   }
 
   .main-tag-name{
-    border-bottom:1px;
+    font-weight: bold;
+    border-bottom: 1px solid rgb(185, 184, 184);
     margin-bottom: 10px;
+    padding-bottom: 15px;
   }
   .blogName{
     font-weight: bold;

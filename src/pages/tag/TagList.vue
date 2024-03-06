@@ -1,7 +1,9 @@
 <template>
   <div>
     <li class="tag-name">
-      <a class="each-tag" >{{titem[0]}} ({{titem[1]}})</a>
+      <a class="each-tag" >{{titem[0]}} 
+        <span class="each-tag-cnt">({{titem[1]}})</span>
+      </a>
     </li> 
   </div>
 </template>
@@ -21,6 +23,7 @@ export default {
   .tag-name{
     margin-bottom: 5px;
     list-style:none;
+    text-align: left;
   }
   .each-tag{
     cursor: pointer;
@@ -29,6 +32,10 @@ export default {
   }
   .each-tag:hover{
     text-decoration: underline;
+  }
+  .each-tag-cnt{
+    color: rgb(100, 100, 100);
+    margin-left: 5px;
   }
 
 </style>
