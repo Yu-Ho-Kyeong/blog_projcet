@@ -2,8 +2,8 @@
     <div class="col">
           <div class="card shadow-sm" v-on:click="fnView(`${bitem.board.boardNo}`)">
             <div v-if="bitem.imgs !==null">
-              <div v-for="img in bitem.imgs" :key="img.boardImgNo">
-                <img :src="img.imgPath" alt="썸네일" class="board-list-img">
+              <div v-for="(img, index) in bitem.imgs" :key="img.boardImgNo">
+                <img v-if="index === 0" :src="img.imgPath" alt="썸네일" class="board-list-img">
               </div>
             </div>
             
@@ -162,6 +162,9 @@ import koLocale from 'date-fns/locale/ko';
   .board-list-img{
     width: 100%;
     height: 500px;
+  }
+  .card-body{
+    border: none !important;
   }
 </style>
 

@@ -64,7 +64,7 @@ export default {
   
   .con_wrap{
     /* padding-left: 220px; */
-    float: right;
-    width: 80%;
+    /* float: right;
+    width: 80%; */
   }
 </style>

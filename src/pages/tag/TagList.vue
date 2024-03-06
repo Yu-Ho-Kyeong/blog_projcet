@@ -17,8 +17,18 @@ export default {
 </script>
 
 <style scoped>
+
+  .tag-name{
+    margin-bottom: 5px;
+    list-style:none;
+  }
   .each-tag{
     cursor: pointer;
+    color: black;
+    text-decoration: none;
+  }
+  .each-tag:hover{
+    text-decoration: underline;
   }
 
 </style>

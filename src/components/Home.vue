@@ -20,6 +20,15 @@
             <a href="#" @click="movePage('introduce')" class="btn btn-secondary my-2">소개</a>
           </p>
         </div>
+
+        <div class="home-tab">
+          <div class="" v-if="this.currentPage === 'board-list'">
+            <BoardList :boardListData="state.boardListData" ref="boardListRef" />
+          </div>
+          <div class="" v-else-if="this.currentPage === 'introduce'">
+            <Introduce />
+          </div>
+        </div>
       </div>
     </section>
 
@@ -31,15 +40,6 @@
                 @click="fnGetListByTag(`${titem[0]}`)" />
       </ul>
     </aside>
-
-    <div class="home-tab">
-      <div class="album py-5 bg-body-tertiary" v-if="this.currentPage === 'board-list'">
-        <BoardList :boardListData="state.boardListData" ref="boardListRef" />
-      </div>
-      <div class="album py-5 bg-body-tertiary" v-else-if="this.currentPage === 'introduce'">
-        <Introduce />
-      </div>
-    </div>
   </div>
 </template>
 
@@ -140,10 +140,11 @@ export default {
 </script>
 
 <style scoped>
-.profile-pic{
-  flex-direction: column;
-  display: inline-flex;
-}
+  
+  .profile-pic{
+    flex-direction: column;
+    display: inline-flex;
+  }
   .profile-pic img{
     width: 100px;
     height: 100px;
@@ -156,23 +157,28 @@ export default {
     position: relative;
   }
   .home-tab{
-    float: center; /* 홈 탭을 왼쪽에 배치하여 공간을 확보 */
-    margin-right: 20px; /* 오른쪽 여백 추가 */
+    text-align: left !important;
+    width: 75%;
+    margin-left: 160px;
   }
+
   .main-tag{
-      position: fixed; 
-      top: 440px;
-      left: 50%;
-      transform: translateX(-540px);
-      width: 200px; 
-      background: #fff;
-      border: 1px solid #aaa;
-    }
+    position: fixed;
+    top: 390px;
+    left: calc(50% - 570px); 
+    width: 200px;
+    background: #fff;
+    /* border: 1px solid #aaa; */
+    z-index: 999;
+  }
+
   .main-tag-name{
     border-bottom:1px;
+    margin-bottom: 10px;
   }
   .blogName{
     font-weight: bold;
   }
+
 </style>
 

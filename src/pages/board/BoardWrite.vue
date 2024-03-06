@@ -120,18 +120,30 @@ export default {
       const apiUrl = this.$boardUrl + '/admin/saveBoard'
       const tagsFromChild = this.$refs.tagInputRef.tags; // 사용자 입력 tag data
       // 신규 게시글 저장 boardContent에 img태그가 포함되어 있어 일단 제외하고 저장
-      if(this.boardNo === undefined){   
-        this.form = {
-          "boardNo"       : this.boardNo,
-          "userNo"        : this.userNo,
-          "boardTitle"    : this.boardTitle,
-          //"boardContent"  : this.contentFromChild,
-          //"tags"          : tagsFromChild.join(', ') //문자열로 전송
-          "tags"          : tagsFromChild // 배열형태로 전송
-        };
-        //console.log('전송 데이터:', this.form);
+      if(this.boardNo === undefined){ 
+        let form = {}
+        if(this.filesFromChild.length > 0) {    // 받아온 이미지 파일이 있으면  
+          form = {
+            "boardNo"       : this.boardNo,
+            "userNo"        : this.userNo,
+            "boardTitle"    : this.boardTitle,
+            //"boardContent"  : this.contentFromChild,
+            //"tags"          : tagsFromChild.join(', ') //문자열로 전송
+            "tags"          : tagsFromChild // 배열형태로 전송
+          };
+        }else{
+          form = {
+            "boardNo"       : this.boardNo,
+            "userNo"        : this.userNo,
+            "boardTitle"    : this.boardTitle,
+            "boardContent"  : this.contentFromChild,
+            "tags"          : tagsFromChild // 배열형태로 전송
+          };
+        }
+        
+        console.log('전송 데이터:', form);
 
-        this.$axios.post(apiUrl, this.form, {
+        this.$axios.post(apiUrl, form, {
           headers : {
             'Content-Type' : 'application/json',
           }
@@ -191,9 +203,11 @@ export default {
                 alert('error');
               }
             });
+          }else{
+            
+            this.fnView(res.data)   // 저장한 게시글의 정보를 다시 불러옴
           }
           alert('글이 저장되었습니다.')
-  
         }).catch((err) => {
           if (err.message.indexOf('Network Error') > -1) {
             alert('네트워크가 원활하지 않습니다.\n잠시 후 다시 시도해주세요.')
