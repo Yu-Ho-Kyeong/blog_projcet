@@ -10,13 +10,10 @@
             <div class="card-body">
               <p class="card-text boardTitle">{{bitem.board.boardTitle}}</p>
               <p class="card-text boardContent">{{ truncateContent(getPlainText(bitem.board.boardContent),150) }}</p>
-              <div v-if="bitem.tags !==null">
+              <div v-if="bitem.tags !==null" class="tagName-wrap">
                 <div v-for="tag in bitem.tags" :key="tag.tagNo">
-                  <p class="card-text tag">{{ tag.tagName }}</p>
+                  <p class="tagName">{{ tag.tagName }}</p>
                 </div>
-              </div>
-              <div v-else>
-                <p class="card-text tag">{{ bitem.tagName }}</p>
               </div>
               
               <div class="d-flex justify-content-between align-items-center">
@@ -114,10 +111,17 @@ import koLocale from 'date-fns/locale/ko';
 </script>
 
 <style scoped>
-  .tag{
-    background-color: aquamarine;
-    width: 3em;
-    border-radius: 7px;
+  .tagName-wrap{
+    display: flex; 
+    flex-wrap: wrap; 
+  }
+  .tagName{
+    display: inline-block; 
+    color: rgb(79, 223, 175);
+    background-color: #f2f5f8;
+    border-radius: 10px;
+    padding: 5px;
+    margin-right: 5px; 
   }
   .boardTitle{
     font-weight: bold;

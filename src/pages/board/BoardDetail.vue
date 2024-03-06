@@ -15,9 +15,12 @@
         <button type="button" 
                 v-on:click="fnList">목록</button>
       </div>
-      <div class="tag-name" v-for="tag in state.boardItems.tags" :key="tag.tagNo">
-        <span class="tagName">{{tag.tagName}}</span>
+      <div class="tag-wrap">
+        <div class="tag-name" v-for="tag in state.boardItems.tags" :key="tag.tagNo">
+          <span class="tagName">{{tag.tagName}}</span>
+        </div>
       </div>
+      
     </div>
 
     <div class="board-contents">
@@ -313,11 +316,19 @@ h1 {
   font-size: 1.0em;
 }
 
+.tag-wrap{
+  display: flex; 
+  flex-wrap: wrap; 
+}
+
 .tagName{
+  display: inline-block; 
   background-color: #f4faff;
-  border-radius: 5px;
+  border-radius: 10px;
   color: rgb(79, 223, 175);
   font-size: 1.2em;
+  padding: 5px; 
+  margin-right: 5px; 
 }
 
 .common-buttons {
