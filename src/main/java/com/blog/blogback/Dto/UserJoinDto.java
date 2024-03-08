@@ -1,11 +1,6 @@
 package com.blog.blogback.Dto;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.blog.blogback.Entity.Role;
 import com.blog.blogback.Entity.User;
-import com.blog.blogback.security.CustomUserDetails;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
